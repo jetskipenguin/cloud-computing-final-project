@@ -13,8 +13,8 @@ try:
     data_bytes = blob.download_as_bytes()
     df = pd.read_csv(io.BytesIO(data_bytes), dtype=str)
 except Exception as e:
-    print(f"Critical Error loading CSV: {e}")
-    df = pd.DataFrame()
+    print(f"Failed to load CSV: {e}")
+    df = pd.read_csv("../archive/aac_shelter_outcomes.csv", dtype=str) # Attempt to read locally
 
 @functions_framework.http
 def search_dogs(request):
@@ -38,11 +38,11 @@ def search_dogs(request):
         # 3. Filter Logic
         # Filter for 'Dog' and ensure outcome_type is NaN (empty)
         # We access the global 'df' variable
-        mask = (df['animal_type'] == 'Dog') & (df['outcome_type'].isna())
+        mask = (df['animal_type'] == 'Dog')
         available_dogs = df[mask]
 
-        # 4. Optional: Breed Filtering
-        # functions_framework request object behaves like a Flask request object
+        print(available_dogs.head())
+
         args = request.args
         breed_query = args.get('breed')
         
@@ -54,6 +54,8 @@ def search_dogs(request):
 
         # Limit results to avoid timeout/payload limits
         available_dogs = available_dogs.head(100)
+
+        print(f"Found {len(available_dogs)} available dogs after filtering.")
 
         # 5. Serialization (Using native Dictionary comprehension)
         results = [
@@ -74,6 +76,7 @@ def search_dogs(request):
         return (json.dumps(results), 200, headers)
 
     except Exception as e:
+        raise e
         # Return strict JSON error even on crash
         error_resp = {"error": str(e)}
         return (json.dumps(error_resp), 500, headers)
