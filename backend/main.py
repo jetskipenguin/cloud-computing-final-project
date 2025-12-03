@@ -18,7 +18,7 @@ except Exception as e:
 
 @functions_framework.http
 def search_dogs(request):
-    # 1. Handle CORS (Preflight)
+    # Handle CORS (Preflight)
     if request.method == 'OPTIONS':
         headers = {
             'Access-Control-Allow-Origin': '*',
@@ -28,36 +28,34 @@ def search_dogs(request):
         }
         return ('', 204, headers)
 
-    # 2. Standard Headers
     headers = {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
     }
 
     try:
-        # 3. Filter Logic
-        # Filter for 'Dog' and ensure outcome_type is NaN (empty)
-        # We access the global 'df' variable
-        mask = (df['animal_type'] == 'Dog')
-        available_dogs = df[mask]
-
-        print(available_dogs.head())
+        available_dogs = df[(df['animal_type'] == 'Dog')]
 
         args = request.args
-        breed_query = args.get('breed')
-        
-        if breed_query:
-            # Case-insensitive substring search
+
+        if breed_query := args.get('breed'):
             available_dogs = available_dogs[
                 available_dogs['breed'].str.lower().str.contains(breed_query.lower(), na=False)
             ]
 
-        # Limit results to avoid timeout/payload limits
+        if colors := args.getlist('color'):
+            colors = [color.lower() for color in colors]
+            print(colors)
+            available_dogs = available_dogs[
+                available_dogs['color'].str.lower().isin(colors)
+            ]
+
+        # limit results to avoid timeout/payload limits
         available_dogs = available_dogs.head(100)
 
         print(f"Found {len(available_dogs)} available dogs after filtering.")
 
-        # 5. Serialization (Using native Dictionary comprehension)
+        # serialization (Using native Dictionary comprehension)
         results = [
             {
                 "id": row.animal_id,
