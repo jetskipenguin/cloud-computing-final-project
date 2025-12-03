@@ -38,17 +38,46 @@ def search_dogs(request):
 
         args = request.args
 
-        if breed_query := args.get('breed'):
-            available_dogs = available_dogs[
-                available_dogs['breed'].str.lower().str.contains(breed_query.lower(), na=False)
-            ]
+        if breed_query := args.getlist('breed'):
+            breed_query = [breed.lower() for breed in breed_query]
+            # Check if any part of the breed query is in the available dogs' breed column
+            # This handles cases where breed might be "Labrador Retriever Mix" and query is "labrador"
+            breed_matches = pd.Series([False] * len(available_dogs), index=available_dogs.index)
+            for breed in breed_query:
+                breed_matches = breed_matches | available_dogs['breed'].str.lower().str.contains(breed, na=False)
+            available_dogs = available_dogs[breed_matches]
+
 
         if colors := args.getlist('color'):
             colors = [color.lower() for color in colors]
-            print(colors)
             available_dogs = available_dogs[
                 available_dogs['color'].str.lower().isin(colors)
             ]
+
+        if age_min := args.get('age_year_min'):
+            try:
+                age_min = float(age_min)
+                available_dogs['age_years'] = available_dogs['age_upon_outcome'].apply(parse_age)
+                available_dogs = available_dogs[
+                    available_dogs['age_years'].notna() & (available_dogs['age_years'] >= age_min)
+                ]
+            except ValueError:
+                print("Failed to filter by age_year_min")
+                pass
+
+        if age_max := args.get('age_year_max'):
+            try:
+                age_max = float(age_max)
+                if 'age_years' not in available_dogs.columns:
+                    available_dogs['age_years'] = available_dogs['age_upon_outcome'].apply(parse_age)
+                available_dogs = available_dogs[
+                    available_dogs['age_years'].notna() & (available_dogs['age_years'] <= age_max)
+                ]
+            except ValueError:
+                print("Failed to filter by age_year_max")
+                pass
+
+
 
         # limit results to avoid timeout/payload limits
         available_dogs = available_dogs.head(100)
@@ -78,3 +107,24 @@ def search_dogs(request):
         # Return strict JSON error even on crash
         error_resp = {"error": str(e)}
         return (json.dumps(error_resp), 500, headers)
+    
+def parse_age(age_str: str) -> float | None:
+    if pd.isna(age_str):
+        return None
+    parts = age_str.split()
+    if len(parts) != 2:
+        return None
+    num, unit = parts
+    try:
+        num = float(num)
+    except ValueError:
+        return None
+    if 'year' in unit:
+        return num
+    elif 'month' in unit:
+        return num / 12
+    elif 'week' in unit:
+        return num / 52
+    elif 'day' in unit:
+        return num / 365
+    return None
