@@ -48,13 +48,20 @@ function renderDogs(dogs) {
         const card = document.createElement('div');
         card.className = 'card';
         
-        // Sanitize outputs to prevent XSS (basic textContent usage handles this)
+        // Store the ID in the DOM in case you need it later (e.g., for a click event)
+        card.dataset.id = dog.id; 
+
+        // DATA CLEANING:
+        // 1. Remove the leading asterisk from names like "*Johnny"
+        // 2. Handle missing names if any
+        const cleanName = dog.name ? dog.name.replace(/^\*/, '') : 'Unknown';
+
         card.innerHTML = `
-            <img src="${dog.image}" alt="Dog">
+            <img src="${dog.image}" alt="${cleanName}">
             <div class="card-content">
-                <h2>${dog.name}</h2>
+                <h2>${cleanName}</h2>
                 <p><strong>Breed:</strong> ${dog.breed}</p>
-                <div class="tags">
+                <p><strong>Color:</strong> ${dog.color}</p> <div class="tags">
                     <span class="tag">${dog.age}</span>
                     <span class="tag">${dog.sex}</span>
                 </div>
