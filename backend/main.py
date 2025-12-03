@@ -77,7 +77,20 @@ def search_dogs(request):
                 print("Failed to filter by age_year_max")
                 pass
 
+        if sex := args.get('sex'):
+            sex = sex.lower()
+            if sex != "male" and sex != "female":
+                error_resp = {"error": "Invalid sex parameter, must be 'male' or 'female'"}
+                return (json.dumps(error_resp), 400, headers)
+            
+            sex_column_lower = available_dogs['sex_upon_outcome'].str.lower()
+            filter_condition = sex_column_lower.str.contains(sex, na=False)
 
+            if sex == "male":
+                # For male, also ensure it does not contain 'female' to avoid ambiguous entries
+                filter_condition = filter_condition & ~sex_column_lower.str.contains("female", na=False)
+            
+            available_dogs = available_dogs[filter_condition]
 
         # limit results to avoid timeout/payload limits
         available_dogs = available_dogs.head(100)
@@ -99,7 +112,7 @@ def search_dogs(request):
             for row in available_dogs.itertuples(index=False)
         ]
 
-        # 6. Return standard JSON response
+        # Return standard JSON response
         return (json.dumps(results), 200, headers)
 
     except Exception as e:
