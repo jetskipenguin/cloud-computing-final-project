@@ -11,7 +11,7 @@ Steps for local development:
 - `cd backend`
 - `pip install -r requirements.txt`
 - Setup gcloud CLI locally. Refer to this doc: https://docs.cloud.google.com/sdk/docs/install#deb
-- Go to `https://storage.googleapis.com/lambda-leash/aac_shelter_outcomes.csv`, make a new directory `archive/` at project root and move the CSV file into it
+- Download the CSV from `https://storage.googleapis.com/lambda-leash/aac_shelter_outcomes.csv`, make a new directory `archive/` at project root and move the CSV file into it
 - `functions-framework --target search_dogs` will start the application locally.
 - From there use curl or postman (https://www.postman.com/downloads/) for sending API calls.
 
