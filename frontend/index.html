@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,6 +16,67 @@
     <main>
         <div class="search-container">
             <input type="text" id="breed-search" placeholder="Filter by breed (e.g., Beagle)...">
+        </div>
+
+        <div id="results-container" class="grid-container">
+            <p class="loading-text">Loading adoptable dogs...</p>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shelter Dog Search</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Quick inline styles for the new filters */
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Find Your New Best Friend</h1>
+        <p>Showing dogs currently available for adoption.</p>
+    </header>
+
+    <main>
+        <div class="search-container">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="breed-search">Breed</label>
+                    <input type="text" id="breed-search" placeholder="e.g. Beagle">
+                </div>
+
+                <div class="filter-group">
+                    <label for="sex-filter">Sex</label>
+                    <select id="sex-filter">
+                        <option value="">Any</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="age-min">Min Age (Years)</label>
+                    <input type="number" id="age-min" placeholder="0" min="0" step="0.5" style="width: 80px;">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="age-max">Max Age (Years)</label>
+                    <input type="number" id="age-max" placeholder="15" min="0" step="0.5" style="width: 80px;">
+                </div>
+
+                <button id="search-btn" style="height: 35px; align-self: flex-end; cursor: pointer;">Search</button>
+            </div>
         </div>
 
         <div id="results-container" class="grid-container">
