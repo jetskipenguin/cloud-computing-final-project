@@ -1,8 +1,8 @@
-// REPLACE THIS URL with your actual Cloud Run Function URL
-const API_URL = "http://localhost:8080"; 
+const API_URL = "https://backend-106820320472.us-west3.run.app"; 
 
 // Grab all DOM elements
-const searchInput = document.getElementById('breed-search');
+const breedSearch = document.getElementById('breed-search');
+const colorFilter = document.getElementById('color-filter');
 const sexFilter = document.getElementById('sex-filter');
 const ageMinInput = document.getElementById('age-min');
 const ageMaxInput = document.getElementById('age-max');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Event Listeners for automatic filtering
-const inputs = [searchInput, sexFilter, ageMinInput, ageMaxInput];
+const inputs = [breedSearch, sexFilter, ageMinInput, ageMaxInput, colorFilter];
 let timeout = null;
 
 inputs.forEach(input => {
@@ -35,10 +35,12 @@ async function fetchDogs() {
         const url = new URL(API_URL);
         
         // 1. Get values from inputs
-        const breed = searchInput.value;
+        const breed = breedSearch.value;
         const sex = sexFilter.value;
         const ageMin = ageMinInput.value;
         const ageMax = ageMaxInput.value;
+        const color = colorFilter.value;
+        console.log(color);
 
         // 2. Append params ONLY if they have values
         // This matches the logic in main.py which checks "if args.get(...)"
@@ -46,6 +48,7 @@ async function fetchDogs() {
         if (sex) url.searchParams.append('sex', sex);
         if (ageMin) url.searchParams.append('age_year_min', ageMin);
         if (ageMax) url.searchParams.append('age_year_max', ageMax);
+        if (color) url.searchParams.append('color', color);
 
         // Visual feedback
         resultsContainer.innerHTML = '<p class="loading-text">Searching...</p>';
